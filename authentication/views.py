@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import generics, response, status
-from serializers import RegisterSerializer
+from .serializers import RegisterSerializer
 
 class RegisterView(generics.GenericAPIView):
 
