@@ -1,4 +1,5 @@
 import email
+from unittest.util import _MAX_LENGTH
 from rest_framework import serializers
 from .models import User
 
@@ -25,4 +26,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 class EmailVerificationSerializer(serializers.ModelSerializer):
-    token= serializers.CharField()
+    token= serializers.CharField(max_length=255)
+
+    class Meta:
+        model = User
+        fields = ['token']
