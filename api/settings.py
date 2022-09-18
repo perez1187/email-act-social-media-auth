@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
     # local
     'authentication',
+    'expenses',
 
     # 3rd parties
     'rest_framework',
