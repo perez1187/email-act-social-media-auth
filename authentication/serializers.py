@@ -1,7 +1,8 @@
-import email
-from unittest.util import _MAX_LENGTH
+from pyexpat import model
 from rest_framework import serializers
+from rest_framework.exceptions import AuthenticationFailed
 from .models import User
+from django.contrib import auth
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=68, write_only=True)
@@ -31,3 +32,32 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['token']
+
+class LoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=255)
+    password = serializers.CharField(max_length=68,write_only=True)
+    tokens = serializers.CharField(max_length= 68, read_only=True)
+
+    class Meta:
+        model= User
+        fields= ['email', 'password', 'tokens']
+
+    def validate(self, attrs):
+        email = attrs.get('email', '')
+        password = attrs.get('password', '')
+
+        user=auth.authenticate(email=email, password=password)
+
+        if not user:
+            raise AuthenticationFailed('invalid credentials, try again')
+
+        if not user.is_active:
+            raise AuthenticationFailed('Account disabled, contact admin')
+
+        if not user.is_verified:
+            raise AuthenticationFailed('Email is not verified')
+
+        return {
+            'email':user.email,
+            'tokens': user.tokens
+        }

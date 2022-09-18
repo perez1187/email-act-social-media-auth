@@ -1,3 +1,4 @@
+from logging import raiseExceptions
 from rest_framework import generics, response, status, views
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -6,8 +7,7 @@ from django.urls import reverse
 from django.conf import settings
 
 # local
-from .serializers import RegisterSerializer as authentication_Register_Serializer
-from .serializers import EmailVerificationSerializer
+from .serializers import RegisterSerializer,EmailVerificationSerializer, LoginSerializer
 from .email_messages import register_sendgrid as authentication_register_sendgrid
 from .models import User
 
@@ -18,7 +18,7 @@ from drf_yasg import openapi
 
 class RegisterView(generics.GenericAPIView):
 
-    serializer_class = authentication_Register_Serializer
+    serializer_class = RegisterSerializer
 
     def post(self, request):
         # save user to db
@@ -70,4 +70,10 @@ class VerifyEmail(views.APIView):
         except jwt.exceptions.DecodeError as identifier:
             return response.Response({'error':'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
-    
+class LoginAPIView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)

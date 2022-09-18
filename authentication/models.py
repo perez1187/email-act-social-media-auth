@@ -3,7 +3,9 @@
     2. we create a new User Manager base on Base User Manager
 '''
 
+from os import access
 from django.db import models
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin)
@@ -58,5 +60,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
-    def token(self):
-        return 'token soon model'
+    ''' when useer login, create tokens '''
+    def tokens(self):
+        refresh = RefreshToken.for_user(self)
+        return {
+            'refres':str(refresh),
+            'access':str(refresh.access_token)
+        }
