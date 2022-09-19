@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.conf import settings
 
 # local
-from .serializers import RegisterSerializer,EmailVerificationSerializer, LoginSerializer
+from .serializers import RegisterSerializer,EmailVerificationSerializer, LoginSerializer, ResetPasswordEmailRequestSerializer
 from .email_messages import register_sendgrid as authentication_register_sendgrid
 from .models import User
 from .renders import UserRenderer
@@ -16,6 +16,14 @@ from .renders import UserRenderer
 import jwt
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+# email reset
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+from .email_messages import reset_pass_sendgrid
 
 class RegisterView(generics.GenericAPIView):
 
@@ -79,3 +87,41 @@ class LoginAPIView(generics.GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+class RequestPasswordResetEmail(generics.GenericAPIView):
+    serializer_class = ResetPasswordEmailRequestSerializer
+
+    def post(self, request):
+
+        # serializer = self.serializer_class(data=data)
+        # serializer.is_valid(raise_exception=True)
+
+        # manually validation
+        email = request.data['email']
+        if User.objects.filter(email=email).exists():
+            # here will send an email
+            user= User.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+
+            # # sending registration email
+            #current_site = get_current_site(request=self.context['request'].domain
+            current_site = get_current_site(request=request).domain
+            relative_link=reverse('password-reset-confirm',kwargs={'uidb64':uidb64,'token':token}) # relative name urls.py
+            absurl = 'http://'+current_site +relative_link
+            
+            email_body = 'hi' # I use template
+
+            data = {
+                "receiver":email,
+                "domain":absurl,
+                "subject": 'Verify Email',
+            }
+
+            reset_pass_sendgrid(data)
+        return response.Response({'success':'We have sent you a link to reset pas'},status=status.HTTP_200_OK)
+
+
+class PasswordTokenCheckAPI(generics.GenericAPIView):
+    def get(self, request, uidb64, token):
+        pass

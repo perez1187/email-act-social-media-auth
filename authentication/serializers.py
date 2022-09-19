@@ -1,8 +1,12 @@
-from pyexpat import model
+
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from .models import User
 from django.contrib import auth
+
+# email reset
+
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=68, write_only=True)
@@ -61,3 +65,13 @@ class LoginSerializer(serializers.ModelSerializer):
             'email':user.email,
             'tokens': user.tokens
         }
+
+class ResetPasswordEmailRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    redirect_url = serializers.CharField(max_length=500, required=False)
+
+    class Meta:
+        fields = ['email']
+    
+ 
