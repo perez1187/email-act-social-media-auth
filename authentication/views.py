@@ -10,6 +10,7 @@ from django.conf import settings
 from .serializers import RegisterSerializer,EmailVerificationSerializer, LoginSerializer
 from .email_messages import register_sendgrid as authentication_register_sendgrid
 from .models import User
+from .renders import UserRenderer
 
 # 3rd part
 import jwt
@@ -19,6 +20,7 @@ from drf_yasg import openapi
 class RegisterView(generics.GenericAPIView):
 
     serializer_class = RegisterSerializer
+    renderer_classes = (UserRenderer,)
 
     def post(self, request):
         # save user to db
