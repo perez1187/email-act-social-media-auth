@@ -5,6 +5,10 @@ class ExpensesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Expense
-        fields = fields = ['date', 'description', 'amount', 'category']
+        fields = ('__all__')
+        
+        extra_kwargs = {
+            "id": {"read_only":True}
+        }
 
     

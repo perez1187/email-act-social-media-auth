@@ -161,6 +161,9 @@ SENDGRID_SANDBOX_MODE_IN_DEBUG=False # false allow send emails
 # echo to stdout or any other file-like object that is passed to the backend via the stream kwarg.
 SENDGRID_ECHO_TO_STDOUT=True
 
+'''
+    thx to this in swagger we login by token not username and password
+'''
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
