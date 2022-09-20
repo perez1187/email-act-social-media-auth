@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.conf import settings
 
 # local
-from .serializers import RegisterSerializer,EmailVerificationSerializer, LoginSerializer, ResetPasswordEmailRequestSerializer
+from .serializers import RegisterSerializer,EmailVerificationSerializer, LoginSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer
 from .email_messages import register_sendgrid as authentication_register_sendgrid
 from .models import User
 from .renders import UserRenderer
@@ -88,6 +88,13 @@ class LoginAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+'''
+    forget password
+    1. User request new password and we send an email with link
+    2. User open email and click link, we check is token is valid
+    3. 
+'''
+
 class RequestPasswordResetEmail(generics.GenericAPIView):
     serializer_class = ResetPasswordEmailRequestSerializer
 
@@ -126,5 +133,26 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
 
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):
+
     def get(self, request, uidb64, token):
-        pass
+
+        try:
+            id = smart_str(urlsafe_base64_decode(uidb64)) #that give us the user
+            user = User.objects.get(id=id)
+            if not PasswordResetTokenGenerator().check_token(user,token):
+                return response.Response({"error":"Token is not vali, please request a new one"})            
+
+            return response.Response({'success': True, 'message':'Credentials Valid','uidb64':uidb64,'token':token},status=status.HTTP_200_OK )
+
+
+        except DjangoUnicodeDecodeError as identifier:
+            if not PasswordResetTokenGenerator().check_token(user):
+                return response.Response({"error":"Token is not vali, please request a new one"})
+
+class SetNewPasswordAPIView(generics.GenericAPIView):
+    serializer_class = SetNewPasswordSerializer
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return response.Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)
