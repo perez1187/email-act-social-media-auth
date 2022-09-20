@@ -105,12 +105,13 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             token = PasswordResetTokenGenerator().make_token(user)
 
             # # sending registration email
-            #current_site = get_current_site(request=self.context['request'].domain
+
             current_site = get_current_site(request=request).domain
             relative_link=reverse('password-reset-confirm',kwargs={'uidb64':uidb64,'token':token}) # relative name urls.py
             absurl = 'http://'+current_site +relative_link
             
             email_body = 'hi' # I use template
+            print (absurl)
 
             data = {
                 "receiver":email,
@@ -119,7 +120,9 @@ class RequestPasswordResetEmail(generics.GenericAPIView):
             }
 
             reset_pass_sendgrid(data)
-        return response.Response({'success':'We have sent you a link to reset pas'},status=status.HTTP_200_OK)
+            return response.Response({'success':'We have sent you a link to reset pas'},status=status.HTTP_200_OK)
+        return response.Response({'error':'Emaiil not exist'},status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 class PasswordTokenCheckAPI(generics.GenericAPIView):
