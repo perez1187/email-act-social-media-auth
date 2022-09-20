@@ -5,3 +5,4 @@ python-decouple
 djangorestframework-simplejwt
 django-sendgrid-v5
 drf-yasg
+django-cors-headers
