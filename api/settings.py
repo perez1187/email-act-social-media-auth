@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'authentication',
     'expenses',
     'income',
+    'social_auth',
 
     # 3rd parties
     'rest_framework',

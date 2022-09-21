@@ -42,6 +42,9 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
+AUTH_PROVIDERS = {'facebook': 'facebook', 'google': 'google',
+                  'twitter': 'twitter', 'email': 'email'}
+
 class User(AbstractBaseUser, PermissionsMixin):
     username = None  # because we dont want username
     email = models.EmailField(max_length=255, unique=True, db_index=True) # db_idndex for faster search
@@ -50,6 +53,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # added for auth provider
+    auth_provider = models.CharField(
+        max_length=255, blank=False,
+        null=False, default=AUTH_PROVIDERS.get('email'))
 
 
     USERNAME_FIELD = 'email' # we set email as login field
